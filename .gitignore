@@ -1,0 +1,54 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+*.DS_Store
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Magnolia ###
+*.log
+.checkstyle
+.metadata
+.clover
+rebel.xml
+rebel-remote.xml
+.rebel.xml.bak
+.rebel-remote.xml.bak
+
+magnolia-ui-vaadin-common-widgets/src/main/java/com/vaadin/ui
+magnolia-ui-vaadin-common-widgets/src/main/java/com/vaadin/client
+magnolia-ui-vaadin-common-widgets/src/main/java/com/vaadin/v7/
+magnolia-ui-vaadin-common-widgets/src/main/java/org/vaadin/openesignforms
+magnolia-ui-vaadin-common-widgets/src/main/java/com/google/
+magnolia-ui-vaadin-common-widgets/src/main/java/com/googlecode/
+magnolia-ui-vaadin-common-widgets/src/main/java/org/
+magnolia-ui-vaadin-common-widgets/src/main/java/META-INF/
+
+magnolia-*-theme/src/main/resources/VAADIN/themes/*/styles.css
