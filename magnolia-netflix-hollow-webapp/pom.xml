@@ -32,7 +32,6 @@
       <type>pom</type>
     </dependency>
 
-
     <!-- option ii - magnolia-community-webapp -->
     <!-- Dependencies versions are already imported by parent pom. Requires "Option A" in the parent pom. -->
     <dependency>
@@ -45,7 +44,12 @@
       <artifactId>magnolia-community-webapp</artifactId>
       <type>pom</type>
     </dependency>
-
+    <!-- Magnolia - Demo Travel tours (Acceptance test) -->
+    <dependency>
+      <groupId>info.magnolia.demo</groupId>
+      <artifactId>magnolia-travel-tours</artifactId>
+      <version>6.4.0</version>
+    </dependency>
 
     <!-- option iii - magnolia-dx-core-webapp -->
     <!-- Dependencies versions are already imported by parent pom. Requires "Option B" in the parent pom. -->
