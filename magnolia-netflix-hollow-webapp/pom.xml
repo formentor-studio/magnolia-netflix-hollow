@@ -44,6 +44,12 @@
       <artifactId>magnolia-community-webapp</artifactId>
       <type>pom</type>
     </dependency>
+    <!-- Netflix Hollow connector -->
+    <dependency>
+      <groupId>org.formentor.magnolia</groupId>
+      <artifactId>netflix-hollow-producer</artifactId>
+      <version>1.0-SNAPSHOT</version>
+    </dependency>
     <!-- Magnolia - Demo Travel tours (Acceptance test) -->
     <dependency>
       <groupId>info.magnolia.demo</groupId>

@@ -93,5 +93,6 @@
   </repositories>
   <modules>
     <module>magnolia-netflix-hollow-webapp</module>
+    <module>netflix-hollow-producer</module>
   </modules>
 </project>
