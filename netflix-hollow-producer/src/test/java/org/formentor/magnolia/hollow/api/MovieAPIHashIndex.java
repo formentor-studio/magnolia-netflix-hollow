@@ -1,11 +1,11 @@
 package org.formentor.magnolia.hollow.api;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
-import com.netflix.hollow.api.consumer.data.AbstractHollowOrdinalIterable;
-import com.netflix.hollow.api.consumer.index.AbstractHollowHashIndex;
 import com.netflix.hollow.core.index.HollowHashIndexResult;
-
 import java.util.Collections;
+import java.lang.Iterable;
+import com.netflix.hollow.api.consumer.index.AbstractHollowHashIndex;
+import com.netflix.hollow.api.consumer.data.AbstractHollowOrdinalIterable;
 
 
 /**

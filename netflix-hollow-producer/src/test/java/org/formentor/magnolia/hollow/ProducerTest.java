@@ -110,8 +110,8 @@ public class ProducerTest {
 
         HollowAPIGenerator generator =
                 new HollowAPIGenerator.Builder().withAPIClassname("MovieAPI")
-                        .withDestination(Path.of(System.getProperty("user.dir"), "src/main/test/java"))
-                        .withPackageName("org.formentor.generated.hollow.api")
+                        .withDestination(Path.of(System.getProperty("user.dir"), "src/test/java"))
+                        .withPackageName("org.formentor.magnolia.hollow.api")
                         .withDataModel(writeEngine)
                         .build();
 
