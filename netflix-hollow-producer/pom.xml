@@ -25,6 +25,15 @@
       <artifactId>magnolia-core</artifactId>
     </dependency>
 
+    <dependency>
+      <groupId>info.magnolia.types</groupId>
+      <artifactId>magnolia-content-types</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>info.magnolia.types</groupId>
+      <artifactId>magnolia-content-types-jcr</artifactId>
+    </dependency>
+    
     <!-- TEST -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

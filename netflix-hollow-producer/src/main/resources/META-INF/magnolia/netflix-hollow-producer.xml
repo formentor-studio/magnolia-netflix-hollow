@@ -10,7 +10,14 @@
 
   <!-- For more information on module descriptor configuration options -->
   <!-- https://documentation.magnolia-cms.com/display/DOCS/XML-based+module+descriptor -->
-
+  <components>
+    <id>main</id>
+    <component>
+      <type>org.formentor.magnolia.hollow.application.ContentSnapshotPublisher</type>
+      <implementation>org.formentor.magnolia.hollow.application.ContentSnapshotPublisher</implementation>
+      <scope>singleton</scope>
+    </component>
+  </components>
   <dependencies>
     <dependency>
       <name>core</name>
