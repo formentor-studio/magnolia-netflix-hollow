@@ -14,6 +14,12 @@
   -->
 
   <dependencies>
+    <!-- Netflix Hollow -->
+    <dependency>
+      <groupId>com.netflix.hollow</groupId>
+      <artifactId>hollow</artifactId>
+      <version>7.15.1</version>
+    </dependency>
     <dependency>
       <groupId>info.magnolia</groupId>
       <artifactId>magnolia-core</artifactId>
@@ -21,8 +27,8 @@
 
     <!-- TEST -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
