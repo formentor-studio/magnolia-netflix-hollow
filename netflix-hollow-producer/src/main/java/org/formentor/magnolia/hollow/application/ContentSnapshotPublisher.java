@@ -16,6 +16,8 @@ import info.magnolia.types.ContentTypeRegistry;
 import info.magnolia.types.datasource.jcr.JcrDataSourceDefinition;
 import info.magnolia.types.model.PropertyDefinition;
 import jakarta.inject.Inject;
+import org.formentor.magnolia.hollow.domain.HollowProducerAnnouncer;
+import org.formentor.magnolia.hollow.domain.HollowProducerPublisher;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
@@ -53,13 +55,10 @@ public class ContentSnapshotPublisher {
     private final Map<String, HollowObjectSchema> hollowObjectSchemas = new HashMap<>(); // key: ContentType name, value: HollowObjectSchema
 
     @Inject
-    public ContentSnapshotPublisher(MagnoliaConfigurationProperties configuration, ContentTypeRegistry contentTypeRegistry) {
+    public ContentSnapshotPublisher(MagnoliaConfigurationProperties configuration, ContentTypeRegistry contentTypeRegistry, HollowProducerPublisher publisher, HollowProducerAnnouncer announcer) {
         this.contentTypeRegistry = contentTypeRegistry;
 
         // Create producer
-        Path publishDir = Path.of(configuration.getProperty("magnolia.home"), "joaquin_hollow");
-        HollowProducer.Publisher publisher = createHollowFilesystemPublisher(publishDir);
-        HollowProducer.Announcer announcer = createHollowFilesystemAnnouncer(publishDir);
         // TODO Create HollowProducer.Incremental to support add, update and delete records!
         producer = HollowProducer
                 .withPublisher(publisher)
@@ -73,6 +72,7 @@ public class ContentSnapshotPublisher {
         producer.initializeDataModel(schemas); // It is necessary to restore current Version
 
         // Restore Latest Version
+        Path publishDir = Path.of(configuration.getProperty("magnolia.home"), "joaquin_hollow");
         HollowFilesystemAnnouncementWatcher announcementWatcher = new HollowFilesystemAnnouncementWatcher(publishDir);
         HollowFilesystemBlobRetriever blobRetriever = new HollowFilesystemBlobRetriever(publishDir);
         long latestAnnouncedVersion = announcementWatcher.getLatestVersion();

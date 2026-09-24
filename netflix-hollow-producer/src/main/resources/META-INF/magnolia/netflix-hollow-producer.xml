@@ -17,6 +17,16 @@
       <implementation>org.formentor.magnolia.hollow.application.ContentSnapshotPublisher</implementation>
       <scope>singleton</scope>
     </component>
+    <component>
+      <type>org.formentor.magnolia.hollow.domain.HollowProducerPublisher</type>
+      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowPublisherFilesystem</implementation>
+      <scope>singleton</scope>
+    </component>
+    <component>
+      <type>org.formentor.magnolia.hollow.domain.HollowProducerAnnouncer</type>
+      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowAnnouncerFilesystem</implementation>
+      <scope>singleton</scope>
+    </component>
   </components>
   <dependencies>
     <dependency>
