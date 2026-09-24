@@ -7,9 +7,11 @@ import com.netflix.hollow.api.producer.HollowProducer;
 import com.netflix.hollow.api.producer.fs.HollowFilesystemAnnouncer;
 import com.netflix.hollow.api.producer.fs.HollowFilesystemPublisher;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
+import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.write.HollowObjectWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -18,24 +20,27 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ProducerWithSchemaTest {
-    @Disabled("Integration test")
-    @Test
-    void produce() {
+
+    private HollowProducer producer;
+    private HollowConsumer consumer;
+    private HollowObjectSchema tourSchema;
+
+    @BeforeEach
+    public void setUp() {
         //
         // 1. Create producer
         //
         Path publishDir = Path.of(System.getProperty("user.dir"), "joaquin_hollow");
         HollowFilesystemPublisher publisher = new HollowFilesystemPublisher(publishDir);
         HollowFilesystemAnnouncer announcer = new HollowFilesystemAnnouncer(publishDir);
-        var producer = HollowProducer
+        producer = HollowProducer
                 .withPublisher(publisher)
                 .withAnnouncer(announcer)
                 .build();
-
         //
         // 2. Define schema
         //
-        HollowObjectSchema tourSchema = new HollowObjectSchema("Tour", 9, "id");
+        tourSchema = new HollowObjectSchema("Tour", 9, "id");
         tourSchema.addField("id", HollowObjectSchema.FieldType.STRING);
         tourSchema.addField("name", HollowObjectSchema.FieldType.STRING);
         tourSchema.addField("description", HollowObjectSchema.FieldType.STRING);
@@ -46,12 +51,26 @@ public class ProducerWithSchemaTest {
         tourSchema.addField("author", HollowObjectSchema.FieldType.STRING);
         tourSchema.addField("body", HollowObjectSchema.FieldType.STRING);
 
+        //
+        // 3. Create consumer and get elements
+        //
+        HollowFilesystemBlobRetriever blobRetriever =
+                new HollowFilesystemBlobRetriever(publishDir);
+        HollowFilesystemAnnouncementWatcher announcementWatcher =
+                new HollowFilesystemAnnouncementWatcher(publishDir);
+        consumer = HollowConsumer.withBlobRetriever(blobRetriever)
+                .withAnnouncementWatcher(announcementWatcher)
+                .build();
+    }
+    @Disabled("Integration test")
+    @Test
+    void produce() {
         producer.initializeDataModel(tourSchema);
 
         //
-        // 3. Add elements
+        // 1. Add elements
         //
-        long v1 = producer.runCycle(state -> {
+        producer.runCycle(state -> {
             HollowWriteStateEngine engine = state.getStateEngine();
 
             HollowObjectWriteRecord tourRec = new HollowObjectWriteRecord(tourSchema);
@@ -68,26 +87,62 @@ public class ProducerWithSchemaTest {
         });
 
         //
-        // 4. Create consumer and get elements
+        // 2. Consume elements
         //
-        HollowFilesystemBlobRetriever blobRetriever =
-                new HollowFilesystemBlobRetriever(publishDir);
-        HollowFilesystemAnnouncementWatcher announcementWatcher =
-                new HollowFilesystemAnnouncementWatcher(publishDir);
-        var consumer = HollowConsumer.withBlobRetriever(blobRetriever)
-                .withAnnouncementWatcher(announcementWatcher)
-                .build();
-
         consumer.triggerRefresh(); // Retrieve last version
         var dataAccess = ((HollowObjectTypeDataAccess)consumer.getAPI().getDataAccess().getTypeDataAccess("Tour"));
+
         String id = dataAccess.readString(0, 0);
         String name = dataAccess.readString(0, 1);
         Boolean isFeatured = dataAccess.readBoolean(0, 3);
         long date = dataAccess.readLong(0, 5);
-        
         assertEquals("3d676477-eabc-4cbe-88b6-b77aa85a358a", id);
         assertEquals("Vietnam: Tradition and Today", name);
         assertEquals(true, isFeatured);
         assertEquals(1790180096970L, date);
+
+        int maxOrdinal = ((HollowObjectTypeReadState) dataAccess).maxOrdinal();
+        for (int i = 0; i <= maxOrdinal; i++) {
+            for (int f = 0; f < tourSchema.numFields(); f++) {
+                System.out.print(f + "(" + tourSchema.getFieldName(f) + ")" + ":");
+                HollowObjectSchema.FieldType type = tourSchema.getFieldType(f);
+                switch (type) {
+                    case STRING -> System.out.println(dataAccess.readString(i, f));
+                    case BOOLEAN -> System.out.println(dataAccess.readBoolean(i, f));
+                    case LONG -> System.out.println(dataAccess.readLong(i, f));
+                    case FLOAT ->  System.out.println(dataAccess.readFloat(i, f));
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    @Test
+    void consume() {
+        var publishDir = Path.of("/Users/joaquinalfaroramonell/Documents/Projects/magnolia-netflix-hollow/30-Bin/magnolia-data/joaquin_hollow");
+        HollowFilesystemBlobRetriever blobRetriever =
+                new HollowFilesystemBlobRetriever(publishDir);
+        HollowFilesystemAnnouncementWatcher announcementWatcher =
+                new HollowFilesystemAnnouncementWatcher(publishDir);
+        consumer = HollowConsumer.withBlobRetriever(blobRetriever)
+                .withAnnouncementWatcher(announcementWatcher)
+                .build();
+
+        consumer.triggerRefresh(); // Retrieve last version
+        var dataAccess = ((HollowObjectTypeDataAccess)consumer.getAPI().getDataAccess().getTypeDataAccess("tour"));
+        int maxOrdinal = ((HollowObjectTypeReadState) dataAccess).maxOrdinal();
+        for (int i = 0; i <= maxOrdinal; i++) {
+            for (int f = 0; f < tourSchema.numFields(); f++) {
+                System.out.print(f + "(" + tourSchema.getFieldName(f) + ")" + ":");
+                HollowObjectSchema.FieldType type = tourSchema.getFieldType(f);
+                switch (type) {
+                    case STRING -> System.out.println(dataAccess.readString(i, f));
+                    case BOOLEAN -> System.out.println(dataAccess.readBoolean(i, f));
+                    case LONG -> System.out.println(dataAccess.readLong(i, f));
+                    case FLOAT ->  System.out.println(dataAccess.readFloat(i, f));
+                }
+            }
+            System.out.println();
+        }
     }
 }
