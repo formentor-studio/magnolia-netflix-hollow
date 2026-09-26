@@ -13,6 +13,22 @@
   <description>Please uncomment and fill in ...</description>
   -->
 
+  <properties>
+    <aws.java.sdk.version>2.55.5</aws.java.sdk.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>bom</artifactId>
+        <version>${aws.java.sdk.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <!-- Netflix Hollow -->
     <dependency>
@@ -33,7 +49,19 @@
       <groupId>info.magnolia.types</groupId>
       <artifactId>magnolia-content-types-jcr</artifactId>
     </dependency>
-    
+
+    <!-- Amazon S3 -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>s3</artifactId>
+    </dependency>
+
+    <!-- Amazon DynamoDB -->
+    <dependency>
+      <groupId>software.amazon.awssdk</groupId>
+      <artifactId>dynamodb</artifactId>
+    </dependency>
+
     <!-- TEST -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>

@@ -1,21 +1,19 @@
 package org.formentor.magnolia.hollow;
 
 import com.netflix.hollow.api.consumer.HollowConsumer;
-import com.netflix.hollow.api.consumer.fs.HollowFilesystemAnnouncementWatcher;
-import com.netflix.hollow.api.consumer.fs.HollowFilesystemBlobRetriever;
 import com.netflix.hollow.api.producer.HollowProducer;
-import com.netflix.hollow.api.producer.fs.HollowFilesystemAnnouncer;
-import com.netflix.hollow.api.producer.fs.HollowFilesystemPublisher;
 import com.netflix.hollow.core.read.dataaccess.HollowObjectTypeDataAccess;
 import com.netflix.hollow.core.read.engine.object.HollowObjectTypeReadState;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.write.HollowObjectWriteRecord;
 import com.netflix.hollow.core.write.HollowWriteStateEngine;
+import org.formentor.magnolia.hollow.infrastructure.HollowAnnouncementWatcherDynamoDB;
+import org.formentor.magnolia.hollow.infrastructure.HollowAnnouncerDynamoDB;
+import org.formentor.magnolia.hollow.infrastructure.HollowBlobRetrieverS3;
+import org.formentor.magnolia.hollow.infrastructure.HollowPublisherS3;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-
-import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,6 +21,8 @@ public class ProducerWithSchemaTest {
 
     private HollowProducer producer;
     private HollowConsumer consumer;
+    private HollowConsumer.AnnouncementWatcher  announcementWatcher;
+
     private HollowObjectSchema tourSchema;
 
     @BeforeEach
@@ -30,9 +30,19 @@ public class ProducerWithSchemaTest {
         //
         // 1. Create producer
         //
-        Path publishDir = Path.of(System.getProperty("user.dir"), "joaquin_hollow");
-        HollowFilesystemPublisher publisher = new HollowFilesystemPublisher(publishDir);
-        HollowFilesystemAnnouncer announcer = new HollowFilesystemAnnouncer(publishDir);
+        /*
+         * Example using FileSystem as storage:
+         *
+         * Path publishDir = Path.of(System.getProperty("user.dir"), "joaquin_hollow");
+         * HollowProducer.Publisher publisher = new HollowFilesystemPublisher(publishDir);
+         * HollowProducer.Announcer announcer = new HollowFilesystemAnnouncer(publishDir);
+         */
+        var definition = new HollowProducerModule();
+        definition.setBucketName("test-netflix-hollow");
+        definition.setTableName("test-netflix-hollow");
+        HollowProducer.Publisher publisher = new HollowPublisherS3(definition);
+        HollowProducer.Announcer announcer = new HollowAnnouncerDynamoDB(definition);
+
         producer = HollowProducer
                 .withPublisher(publisher)
                 .withAnnouncer(announcer)
@@ -54,14 +64,20 @@ public class ProducerWithSchemaTest {
         //
         // 3. Create consumer and get elements
         //
-        HollowFilesystemBlobRetriever blobRetriever =
-                new HollowFilesystemBlobRetriever(publishDir);
-        HollowFilesystemAnnouncementWatcher announcementWatcher =
-                new HollowFilesystemAnnouncementWatcher(publishDir);
+        /*
+        * Example using FileSystem as storage:
+        *
+        * Path publishDir = Path.of(System.getProperty("user.dir"), "joaquin_hollow");
+        * HollowConsumer.BlobRetriever blobRetriever = new HollowFilesystemBlobRetriever(publishDir);
+        * HollowConsumer.AnnouncementWatcher announcementWatcher = new HollowFilesystemAnnouncementWatcher(publishDir);
+        */
+        HollowConsumer.BlobRetriever blobRetriever = new HollowBlobRetrieverS3(definition, (HollowPublisherS3) publisher);
+        HollowConsumer.AnnouncementWatcher announcementWatcher = new HollowAnnouncementWatcherDynamoDB(definition);
         consumer = HollowConsumer.withBlobRetriever(blobRetriever)
                 .withAnnouncementWatcher(announcementWatcher)
                 .build();
     }
+
     @Disabled("Integration test")
     @Test
     void produce() {
@@ -115,19 +131,15 @@ public class ProducerWithSchemaTest {
             }
             System.out.println();
         }
+
+        if (announcementWatcher instanceof HollowAnnouncementWatcherDynamoDB) {
+            ((HollowAnnouncementWatcherDynamoDB)announcementWatcher).close();
+        }
     }
 
     @Test
+    @Disabled("Integration test")
     void consume() {
-        var publishDir = Path.of("/Users/joaquinalfaroramonell/Documents/Projects/magnolia-netflix-hollow/30-Bin/magnolia-data/joaquin_hollow");
-        HollowFilesystemBlobRetriever blobRetriever =
-                new HollowFilesystemBlobRetriever(publishDir);
-        HollowFilesystemAnnouncementWatcher announcementWatcher =
-                new HollowFilesystemAnnouncementWatcher(publishDir);
-        consumer = HollowConsumer.withBlobRetriever(blobRetriever)
-                .withAnnouncementWatcher(announcementWatcher)
-                .build();
-
         consumer.triggerRefresh(); // Retrieve last version
         var dataAccess = ((HollowObjectTypeDataAccess)consumer.getAPI().getDataAccess().getTypeDataAccess("tour"));
         int maxOrdinal = ((HollowObjectTypeReadState) dataAccess).maxOrdinal();
@@ -143,6 +155,10 @@ public class ProducerWithSchemaTest {
                 }
             }
             System.out.println();
+        }
+
+        if (announcementWatcher instanceof HollowAnnouncementWatcherDynamoDB) {
+            ((HollowAnnouncementWatcherDynamoDB)announcementWatcher).close();
         }
     }
 }

@@ -18,13 +18,23 @@
       <scope>singleton</scope>
     </component>
     <component>
-      <type>org.formentor.magnolia.hollow.domain.HollowProducerPublisher</type>
-      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowPublisherFilesystem</implementation>
+      <type>org.formentor.magnolia.hollow.domain.HollowPublisher</type>
+      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowPublisherS3</implementation>
       <scope>singleton</scope>
     </component>
     <component>
-      <type>org.formentor.magnolia.hollow.domain.HollowProducerAnnouncer</type>
-      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowAnnouncerFilesystem</implementation>
+      <type>org.formentor.magnolia.hollow.domain.HollowAnnouncer</type>
+      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowAnnouncerDynamoDB</implementation>
+      <scope>singleton</scope>
+    </component>
+    <component>
+      <type>org.formentor.magnolia.hollow.domain.HollowBlobRetriever</type>
+      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowBlobRetrieverS3</implementation>
+      <scope>singleton</scope>
+    </component>
+    <component>
+      <type>org.formentor.magnolia.hollow.domain.HollowAnnouncementWatcher</type>
+      <implementation>org.formentor.magnolia.hollow.infrastructure.HollowAnnouncementWatcherDynamoDB</implementation>
       <scope>singleton</scope>
     </component>
   </components>

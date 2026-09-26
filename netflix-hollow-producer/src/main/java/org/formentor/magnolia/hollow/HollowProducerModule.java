@@ -14,6 +14,9 @@ import info.magnolia.module.ModuleLifecycleContext;
 public class HollowProducerModule implements ModuleLifecycle {
     /* you can optionally implement info.magnolia.module.ModuleLifecycle */
 
+    private String bucketName;
+    private String tableName;
+
     @Override
     public void start(ModuleLifecycleContext moduleLifecycleContext) {
         ModuleLifecycle.super.start(moduleLifecycleContext);
@@ -22,5 +25,21 @@ public class HollowProducerModule implements ModuleLifecycle {
     @Override
     public void stop(ModuleLifecycleContext moduleLifecycleContext) {
         ModuleLifecycle.super.stop(moduleLifecycleContext);
+    }
+
+    public String getBucketName() {
+        return bucketName;
+    }
+
+    public void setBucketName(String bucketName) {
+        this.bucketName = bucketName;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 }

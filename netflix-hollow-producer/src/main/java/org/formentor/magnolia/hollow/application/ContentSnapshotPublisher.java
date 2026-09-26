@@ -2,28 +2,24 @@ package org.formentor.magnolia.hollow.application;
 
 import com.google.common.collect.ImmutableMap;
 import com.machinezoo.noexception.Exceptions;
-import com.netflix.hollow.api.consumer.fs.HollowFilesystemAnnouncementWatcher;
-import com.netflix.hollow.api.consumer.fs.HollowFilesystemBlobRetriever;
 import com.netflix.hollow.api.producer.HollowProducer;
-import com.netflix.hollow.api.producer.fs.HollowFilesystemAnnouncer;
-import com.netflix.hollow.api.producer.fs.HollowFilesystemPublisher;
 import com.netflix.hollow.core.schema.HollowObjectSchema;
 import com.netflix.hollow.core.write.HollowObjectWriteRecord;
 import info.magnolia.config.registry.DefinitionProvider;
-import info.magnolia.init.MagnoliaConfigurationProperties;
 import info.magnolia.types.ContentTypeDefinition;
 import info.magnolia.types.ContentTypeRegistry;
 import info.magnolia.types.datasource.jcr.JcrDataSourceDefinition;
 import info.magnolia.types.model.PropertyDefinition;
 import jakarta.inject.Inject;
-import org.formentor.magnolia.hollow.domain.HollowProducerAnnouncer;
-import org.formentor.magnolia.hollow.domain.HollowProducerPublisher;
+import org.formentor.magnolia.hollow.domain.HollowAnnouncementWatcher;
+import org.formentor.magnolia.hollow.domain.HollowAnnouncer;
+import org.formentor.magnolia.hollow.domain.HollowBlobRetriever;
+import org.formentor.magnolia.hollow.domain.HollowPublisher;
 
 import javax.jcr.Node;
 import javax.jcr.Property;
 import javax.jcr.RepositoryException;
 import java.math.BigDecimal;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +51,7 @@ public class ContentSnapshotPublisher {
     private final Map<String, HollowObjectSchema> hollowObjectSchemas = new HashMap<>(); // key: ContentType name, value: HollowObjectSchema
 
     @Inject
-    public ContentSnapshotPublisher(MagnoliaConfigurationProperties configuration, ContentTypeRegistry contentTypeRegistry, HollowProducerPublisher publisher, HollowProducerAnnouncer announcer) {
+    public ContentSnapshotPublisher(ContentTypeRegistry contentTypeRegistry, HollowPublisher publisher, HollowAnnouncer announcer, HollowBlobRetriever blobRetriever, HollowAnnouncementWatcher  announcementWatcher) {
         this.contentTypeRegistry = contentTypeRegistry;
 
         // Create producer
@@ -72,14 +68,19 @@ public class ContentSnapshotPublisher {
         producer.initializeDataModel(schemas); // It is necessary to restore current Version
 
         // Restore Latest Version
-        Path publishDir = Path.of(configuration.getProperty("magnolia.home"), "joaquin_hollow");
-        HollowFilesystemAnnouncementWatcher announcementWatcher = new HollowFilesystemAnnouncementWatcher(publishDir);
-        HollowFilesystemBlobRetriever blobRetriever = new HollowFilesystemBlobRetriever(publishDir);
         long latestAnnouncedVersion = announcementWatcher.getLatestVersion();
+        if (announcementWatcher instanceof AutoCloseable) {
+            try {
+                ((AutoCloseable) announcementWatcher).close();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         producer.restore(latestAnnouncedVersion, blobRetriever);
     }
 
     public void publish(Node contentNode) {
+
         List<ContentTypeDefinition> contentTypes = getContentTypes(contentNode);
         contentTypes.forEach(contentType -> {
             Optional<HollowObjectWriteRecord> hollowRecord = buildHollowRecord(contentNode, contentType);
@@ -166,13 +167,5 @@ public class ContentSnapshotPublisher {
 
     private List<PropertyDefinition> getPropertiesSupported(ContentTypeDefinition contentType) {
         return contentType.getModel().getProperties().stream().filter(propertyDefinition -> TYPE_MAPPING_HOLLOW.containsKey(propertyDefinition.getType())).toList();
-    }
-
-    private HollowProducer.Publisher createHollowFilesystemPublisher(Path publishDir) {
-        return new HollowFilesystemPublisher(publishDir);
-    }
-
-    private HollowProducer.Announcer createHollowFilesystemAnnouncer(Path publishDir) {
-        return new HollowFilesystemAnnouncer(publishDir);
     }
 }
