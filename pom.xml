@@ -71,7 +71,7 @@
   <repositories>
     <repository>
       <id>magnolia.public</id>
-      <url>https://nexus.magnolia-cms.com/content/groups/public</url>
+      <url>https://nexus.magnolia-cms.com/repository/public/</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
